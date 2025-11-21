@@ -1,3 +1,4 @@
+// src/app/auth/signup/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -17,20 +18,25 @@ export default function SignupPage() {
     setLoading(true);
     setErrorMessage("");
 
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/login`,
+      },
+    });
 
     if (error) setErrorMessage(error.message);
-    else alert("Signup successful! Please check your email to confirm.");
-
+    else alert("Signup successful! Check your email to confirm.");
     setLoading(false);
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
         {errorMessage && (
-          <div className="bg-red-100 text-red-800 p-2 mb-4 rounded">{errorMessage}</div>
+          <div className="bg-red-600 text-white p-2 mb-4 rounded">{errorMessage}</div>
         )}
         <form onSubmit={handleSignup} className="space-y-4">
           <input
@@ -38,7 +44,7 @@ export default function SignupPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full p-3 border border-gray-700 rounded bg-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
             required
           />
           <input
@@ -46,7 +52,7 @@ export default function SignupPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full p-3 border border-gray-700 rounded bg-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
             required
           />
           <button
@@ -57,9 +63,9 @@ export default function SignupPage() {
             {loading ? "Signing up..." : "Sign Up"}
           </button>
         </form>
-        <p className="mt-4 text-center">
+        <p className="mt-4 text-center text-gray-300">
           Already have an account?{" "}
-          <Link href="/auth/login" className="text-blue-500 hover:underline">
+          <Link href="/auth/login" className="text-blue-400 hover:underline">
             Login
           </Link>
         </p>

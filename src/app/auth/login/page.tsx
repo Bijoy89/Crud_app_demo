@@ -17,7 +17,7 @@ export default function LoginPage() {
     setLoading(true);
     setErrorMessage("");
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) setErrorMessage(error.message);
     else router.push("/dashboard");
@@ -26,8 +26,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
         {errorMessage && (
           <div className="bg-red-100 text-red-800 p-2 mb-4 rounded">{errorMessage}</div>
@@ -38,7 +38,7 @@ export default function LoginPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
           <input
@@ -46,7 +46,7 @@ export default function LoginPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
           <button
@@ -59,7 +59,7 @@ export default function LoginPage() {
         </form>
         <p className="mt-4 text-center">
           Don’t have an account?{" "}
-          <Link href="/auth/signup" className="text-green-500 hover:underline">
+          <Link href="/auth/signup" className="text-green-400 hover:underline">
             Sign Up
           </Link>
         </p>

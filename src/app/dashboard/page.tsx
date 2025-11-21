@@ -1,8 +1,9 @@
+// src/app/dashboard/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import Link from "next/link";
+import LogoutButton from "@/components/LogoutButton";
 
 interface Todo {
   id: string;
@@ -32,14 +33,11 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Dashboard</h1>
-      <Link
-        href="/todos/new"
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-6 inline-block"
-      >
-        + New Todo
-      </Link>
+    <div className="p-6 max-w-4xl mx-auto bg-gray-900 min-h-screen text-white">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-center">Dashboard</h1>
+        <LogoutButton />
+      </div>
 
       {loading ? (
         <p>Loading todos...</p>
@@ -50,11 +48,11 @@ export default function DashboardPage() {
           {todos.map((todo) => (
             <li
               key={todo.id}
-              className="border p-4 rounded-lg hover:shadow transition flex justify-between items-center"
+              className="border p-4 rounded-lg hover:shadow transition flex justify-between items-center bg-gray-800"
             >
               <div>
                 <h2 className="font-semibold text-lg">{todo.title}</h2>
-                <p className="text-gray-600">{todo.description}</p>
+                <p className="text-gray-300">{todo.description}</p>
               </div>
               <span
                 className={`px-3 py-1 rounded-full text-white font-medium ${
