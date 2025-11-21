@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 interface Todo {
@@ -15,17 +14,17 @@ interface Todo {
 export default function DashboardPage() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function fetchTodos() {
       const { data, error } = await supabase
-        .from("todos")
+        .from<"todos",Todo>("todos")
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) console.error(error);
-      else setTodos(data);
+      if (error) setError(error.message);
+      else setTodos(data ?? []);
 
       setLoading(false);
     }
@@ -34,27 +33,39 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-      <Link
-        href="/todos/new"
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4 inline-block"
-      >
-        + New Todo
-      </Link>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-center">Dashboard</h1>
+      <div className="flex justify-center mb-6">
+        <Link
+          href="/todos/new"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+        >
+          + New Todo
+        </Link>
+      </div>
 
-      {loading ? (
-        <p>Loading todos...</p>
-      ) : todos.length === 0 ? (
-        <p>No todos found.</p>
-      ) : (
-        <ul className="space-y-3">
+      {loading && <p className="text-center">Loading todos...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
+
+      {!loading && todos.length === 0 && <p className="text-center">No todos found.</p>}
+
+      {!loading && todos.length > 0 && (
+        <ul className="grid gap-4 md:grid-cols-2">
           {todos.map((todo) => (
-            <li key={todo.id} className="border p-3 rounded hover:shadow">
+            <li
+              key={todo.id}
+              className="border p-4 rounded hover:shadow transition bg-white"
+            >
               <Link href={`/todos/${todo.id}`} className="block">
-                <h2 className="font-semibold">{todo.title}</h2>
-                <p className="text-gray-600">{todo.description}</p>
-                <p>Status: {todo.is_completed ? "Completed" : "Pending"}</p>
+                <h2 className="font-semibold text-lg mb-2">{todo.title}</h2>
+                <p className="text-gray-600 mb-2">{todo.description}</p>
+                <p
+                  className={`font-semibold ${
+                    todo.is_completed ? "text-green-600" : "text-yellow-600"
+                  }`}
+                >
+                  {todo.is_completed ? "Completed" : "Pending"}
+                </p>
               </Link>
             </li>
           ))}
