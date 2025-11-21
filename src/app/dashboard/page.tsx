@@ -1,72 +1,67 @@
-"use client";
+// src/app/dashboard/page.tsx
+import { createServerClient } from "@/lib/supabaseServerClient";
+import { redirect } from "next/navigation";
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import Link from "next/link";
-
-interface Todo {
+type Todo = {
   id: string;
   title: string;
   description: string;
-  is_completed: boolean;
-  created_at?: string;
+  user_id: string;
+  created_at: string;
   updated_at?: string;
-}
+};
 
-export default function DashboardPage() {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [loading, setLoading] = useState(true);
+export default async function DashboardPage() {
+  // Initialize Supabase server client (service role key, no arguments)
+  const supabase = createServerClient();
 
-  useEffect(() => {
-    async function fetchTodos() {
-      const { data, error } = await supabase
-        .from<"todos", Todo>("todos") // ✅ two type arguments
-        .select("*")
-        .order("created_at", { ascending: false });
+  // Get current session
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
 
-      if (error) console.error(error);
-      else setTodos(data ?? []);
-      setLoading(false);
-    }
+  if (sessionError) {
+    console.error("Session error:", sessionError.message);
+    redirect("/auth/login");
+  }
 
-    fetchTodos();
-  }, []);
+  if (!session) {
+    redirect("/auth/login");
+  }
+
+  const userId = session.user.id;
+
+  // Fetch todos for this user
+  const { data: todos, error } = await supabase
+    .from("todos")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Fetch todos error:", error.message);
+    return <p>Error loading todos: {error.message}</p>;
+  }
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Dashboard</h1>
-      <Link
-        href="/todos/new"
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-6 inline-block"
-      >
-        + New Todo
-      </Link>
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
 
-      {loading ? (
-        <p>Loading todos...</p>
-      ) : todos.length === 0 ? (
-        <p>No todos found.</p>
-      ) : (
+      {todos && todos.length > 0 ? (
         <ul className="space-y-4">
-          {todos.map((todo) => (
-            <li
-              key={todo.id}
-              className="border p-4 rounded-lg hover:shadow transition flex justify-between items-center"
-            >
-              <div>
-                <h2 className="font-semibold text-lg">{todo.title}</h2>
-                <p className="text-gray-600">{todo.description}</p>
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-white font-medium ${
-                  todo.is_completed ? "bg-green-500" : "bg-yellow-500"
-                }`}
-              >
-                {todo.is_completed ? "Completed" : "Pending"}
-              </span>
+          {todos.map((todo: any) => (
+            <li key={todo.id} className="border p-4 rounded shadow">
+              <h2 className="text-xl font-semibold">{todo.title}</h2>
+              <p className="mt-2">{todo.description}</p>
+              <small className="text-gray-500">
+                Created at: {new Date(todo.created_at).toLocaleString()}
+              </small>
             </li>
           ))}
         </ul>
+      ) : (
+        <p>No todos found. Create your first todo!</p>
       )}
     </div>
   );

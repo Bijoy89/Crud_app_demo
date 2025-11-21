@@ -16,7 +16,6 @@ export async function POST(req: Request) {
 
     if (todoErr) return NextResponse.json({ error: todoErr.message }, { status: 500 });
 
-    // audit logs table is 'audit_logs' (not 'audit_log')
     const { error: auditErr } = await supabase.from("audit_logs").insert({
       user_id,
       action: "create",
