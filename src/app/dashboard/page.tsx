@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
-// Define the Todo type
 interface Todo {
   id: string;
   title: string;
@@ -20,45 +19,39 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check session and fetch todos
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-
-      if (error) {
-        setError(error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (!session) {
-        router.push("/auth/login");
-        return;
-      }
-
-      fetchTodos(session.user.id);
-    };
-
-    const fetchTodos = async (userId: string) => {
-      setLoading(true);
+    const fetchTodos = async () => {
       try {
-        // Here we provide both type arguments: Row type and Select type
-        const { data, error } = await supabase
-          .from<Todo, Todo>("todos")
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (sessionError) throw sessionError;
+        if (!session) {
+          router.push("/auth/login");
+          return;
+        }
+
+        // ✅ DO NOT pass Todo type; use any to avoid infinite recursion
+        const { data, error: todosError } = await supabase
+          .from("todos") // <any> avoids TS deep recursion
           .select("*")
-          .eq("user_id", userId)
+          .eq("user_id", session.user.id)
           .order("created_at", { ascending: false });
 
-        if (error) throw error;
-        setTodos(data || []);
+        if (todosError) throw todosError;
+
+        // ✅ cast to Todo[]
+        setTodos(data as Todo[]);
       } catch (err: any) {
-        setError(err.message ?? "Failed to load todos");
+        setError(err.message ?? "Unknown error");
       } finally {
         setLoading(false);
       }
     };
 
-    checkSession();
+    fetchTodos();
   }, [router]);
 
   if (loading) return <p className="text-center mt-10">Loading todos...</p>;
