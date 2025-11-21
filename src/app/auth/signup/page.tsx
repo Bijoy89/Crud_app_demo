@@ -1,3 +1,6 @@
+// src/app/auth/signup/page.tsx
+"use client";
+
 import { supabase } from "@/lib/supabaseClient";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -5,9 +8,14 @@ import { useRouter } from "next/navigation";
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleSignUp = async () => {
+  const handleSignup = async () => {
+    setLoading(true);
+    setError(null);
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -16,33 +24,43 @@ export default function SignUpPage() {
       },
     });
 
+    setLoading(false);
+
     if (error) {
-      alert(error.message);
+      setError(error.message);
     } else {
-      alert("Check your email for the confirmation link!");
+      alert("Check your email for confirmation link!");
       router.push("/auth/login");
     }
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl mb-4">Sign Up</h1>
+    <div className="max-w-md mx-auto mt-10 p-6 border rounded shadow">
+      <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
+
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
       <input
         type="email"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="border p-2 mb-2 w-full"
+        className="w-full p-2 border mb-2 rounded"
       />
       <input
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="border p-2 mb-4 w-full"
+        className="w-full p-2 border mb-4 rounded"
       />
-      <button onClick={handleSignUp} className="px-4 py-2 bg-blue-500 text-white rounded">
-        Sign Up
+
+      <button
+        onClick={handleSignup}
+        disabled={loading}
+        className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+      >
+        {loading ? "Signing up..." : "Sign Up"}
       </button>
     </div>
   );
