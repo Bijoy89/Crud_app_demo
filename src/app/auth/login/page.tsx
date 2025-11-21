@@ -1,31 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  // Handle magic link login / confirmation
-  useEffect(() => {
-    const access_token = searchParams.get("access_token");
-    const refresh_token = searchParams.get("refresh_token");
-
-    if (access_token && refresh_token) {
-      supabase.auth
-        .setSession({ access_token, refresh_token })
-        .then(() => router.replace("/dashboard"))
-        .catch((err) => console.error(err));
-    }
-  }, [searchParams, router]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -34,11 +19,8 @@ export default function LoginPage() {
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setErrorMessage(error.message);
-    } else {
-      router.push("/dashboard");
-    }
+    if (error) setErrorMessage(error.message);
+    else router.push("/dashboard");
 
     setLoading(false);
   }

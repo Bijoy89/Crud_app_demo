@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 
 export default function SignupPage() {
@@ -10,25 +10,17 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
+    setErrorMessage("");
 
-    const { error } = await supabase.auth.signUp(
-      { email, password },
-      
-    );
+    const { error } = await supabase.auth.signUp({ email, password });
 
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage(
-        "Signup successful! Check your email to confirm your account before logging in."
-      );
-    }
+    if (error) setErrorMessage(error.message);
+    else alert("Signup successful! Please check your email to confirm.");
 
     setLoading(false);
   }
@@ -37,8 +29,8 @@ export default function SignupPage() {
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
-        {message && (
-          <div className="bg-blue-100 text-blue-800 p-2 mb-4 rounded">{message}</div>
+        {errorMessage && (
+          <div className="bg-red-100 text-red-800 p-2 mb-4 rounded">{errorMessage}</div>
         )}
         <form onSubmit={handleSignup} className="space-y-4">
           <input
@@ -46,7 +38,7 @@ export default function SignupPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
             required
           />
           <input
@@ -54,7 +46,7 @@ export default function SignupPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
             required
           />
           <button
