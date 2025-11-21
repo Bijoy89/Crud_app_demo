@@ -18,7 +18,9 @@ export async function middleware(req:NextRequest){
 
 
 }
-export const config={
-    matcher:['/dashboard/path*','/todos/:path*']
-
+export const config = {
+  matcher: [
+    "/dashboard/:path*", 
+    "/todos/:path*"
+  ],
 };
