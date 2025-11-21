@@ -9,6 +9,7 @@ export default function TodoDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isCompleted, setIsCompleted] = useState(false);
@@ -16,6 +17,8 @@ export default function TodoDetailPage() {
 
   useEffect(() => {
     async function fetchTodo() {
+      if (!id) return;
+
       const { data, error } = await supabase
         .from("todos")
         .select("*")
@@ -39,23 +42,19 @@ export default function TodoDetailPage() {
     } = await supabase.auth.getUser();
     if (!user) return alert("Login required");
 
-    const res = await updateTodo(
-      id!,
-      { title, description, is_completed: isCompleted },
-      user.id
-    );
+    const res = await updateTodo(id!, {
+      title,
+      description,
+      is_completed: isCompleted,
+      user_id: user.id, // include user id inside newData
+    });
 
     if (res.success) alert("Updated!");
     else alert(res.error || "Error updating");
   }
 
   async function handleDelete() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return alert("Login required");
-
-    const res = await deleteTodo(id!, user.id);
+    const res = await deleteTodo(id!);
 
     if (res.success) router.push("/todos");
     else alert(res.error || "Error deleting");

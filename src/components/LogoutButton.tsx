@@ -1,4 +1,3 @@
-// src/components/LogoutButton.tsx
 "use client";
 
 import { supabase } from "@/lib/supabaseClient";
