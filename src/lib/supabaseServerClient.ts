@@ -1,12 +1,12 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+// src/lib/supabaseServerClient.ts
+import { createClient } from "@supabase/supabase-js";
 
-export function supabaseServerClient(): SupabaseClient {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Server-side client with Service Role Key
+export function createServerClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-  return createClient(url, serviceRoleKey, {
-    auth: {
-      persistSession: false, // server-side sessions
-    },
+  return createClient(supabaseUrl, supabaseServiceRoleKey, {
+    auth: { persistSession: false },
   });
 }
