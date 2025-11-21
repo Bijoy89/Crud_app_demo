@@ -1,16 +1,22 @@
-// src/app/auth/signup/page.tsx
 "use client";
 
-import { supabase } from "@/lib/supabaseClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function SignUpPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) router.push("/dashboard");
+    });
+  }, [router]);
 
   const handleSignup = async () => {
     setLoading(true);
@@ -37,9 +43,7 @@ export default function SignUpPage() {
   return (
     <div className="max-w-md mx-auto mt-10 p-6 border rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
-
       {error && <p className="text-red-500 mb-4">{error}</p>}
-
       <input
         type="email"
         placeholder="Email"
@@ -54,7 +58,6 @@ export default function SignUpPage() {
         onChange={(e) => setPassword(e.target.value)}
         className="w-full p-2 border mb-4 rounded"
       />
-
       <button
         onClick={handleSignup}
         disabled={loading}

@@ -11,6 +11,7 @@ interface Todo {
   user_id: string;
   created_at: string;
   updated_at?: string;
+  is_completed?: boolean;
 }
 
 export default function DashboardPage() {
@@ -33,16 +34,14 @@ export default function DashboardPage() {
           return;
         }
 
-        // ✅ DO NOT pass Todo type; use any to avoid infinite recursion
         const { data, error: todosError } = await supabase
-          .from("todos") // <any> avoids TS deep recursion
+          .from("todos") // ✅ no generics to avoid TS recursion
           .select("*")
           .eq("user_id", session.user.id)
           .order("created_at", { ascending: false });
 
         if (todosError) throw todosError;
 
-        // ✅ cast to Todo[]
         setTodos(data as Todo[]);
       } catch (err: any) {
         setError(err.message ?? "Unknown error");
